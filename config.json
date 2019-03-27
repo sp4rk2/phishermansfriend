@@ -1,6 +1,26 @@
 {
     "dataSet": "inbox1.mbox",
 
+    "emailObject": {
+        "returnPath": true,
+        "xOriginalTo": false,
+        "deliveredTo": false,
+        "received": false,
+        "from": false,
+        "subject": false,
+        "to": false,
+        "contentType": false,
+        "mimeVersion": false,
+        "replyTo": false,
+        "date": false,
+        "messageId": false,
+        "status": false,
+        "xStatus": false,
+        "xKeywords": false,
+        "xUid": false
+    },
+
+
     "attributes": {
         "test": true,
         "blah": false

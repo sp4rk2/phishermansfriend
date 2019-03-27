@@ -3,4 +3,4 @@ let feedSystem = require("../feed-system/feed-system.js");
 let parser = require("../parser/parser.js");
 
 
-parser.start();
+parser.init();
