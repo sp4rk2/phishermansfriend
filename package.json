@@ -1,0 +1,21 @@
+{
+  "name": "phishermansfriend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bin/app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./bin/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sp4rk2/phishermansfriend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/sp4rk2/phishermansfriend/issues"
+  },
+  "homepage": "https://github.com/sp4rk2/phishermansfriend#readme",
+  "dependencies": {}
+}

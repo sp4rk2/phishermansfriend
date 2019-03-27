@@ -1,0 +1,10 @@
+{
+    "dataSet": "inbox1.mbox",
+
+    "attributes": {
+        "test": true,
+        "blah": false
+    }
+
+
+}
