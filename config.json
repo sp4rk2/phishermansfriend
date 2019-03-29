@@ -3,12 +3,12 @@
 
     "emailObject": {
         "returnPath": true,
-        "xOriginalTo": false,
-        "deliveredTo": false,
+        "xOriginalTo": true,
+        "deliveredTo": true,
         "received": false,
-        "from": false,
-        "subject": false,
-        "to": false,
+        "from": true,
+        "subject": true,
+        "to": true,
         "contentType": false,
         "mimeVersion": false,
         "replyTo": false,

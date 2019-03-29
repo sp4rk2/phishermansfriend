@@ -17,5 +17,9 @@
     "url": "https://github.com/sp4rk2/phishermansfriend/issues"
   },
   "homepage": "https://github.com/sp4rk2/phishermansfriend#readme",
-  "dependencies": {}
+  "dependencies": {
+    "mailparser": "^2.6.0",
+    "node-mbox": "^1.0.0",
+    "yargs": "^13.2.2"
+  }
 }

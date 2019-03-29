@@ -1,0 +1,18 @@
+From exchange-robot@paypal.com  Sun Nov 28 17:22:23 2004
+Return-Path: <exchange-robot@paypal.com>
+X-Original-To: username@domain.com
+Delivered-To: username@domain.com
+Received: from mail2.domain.com (mail2.domain.com [192.168.64.8])
+	by spanky.domain.com (Postfix) with ESMTP id 9CE11537B7D
+Content-Type: multipart/mixed;
+	boundary="----=_NextPart_000_0000_01C4D5AE.9231CEA0"
+X-Priority: 3
+X-MSMail-Priority: Normal
+X-Mailer: Microsoft Outlook Express 6.00.2600.0000
+
+<p><i>Congratulations! PayPal has successfully charged $175 to your credit
+card. Your order tracking number is A866DEC0, and your item will be shipped
+within three business days. </i></p>
+<p><i>Thank you for using PayPal.</i></p>
+</body>
+</html>
