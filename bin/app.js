@@ -1,6 +1,22 @@
-let config = require("../config.json");
-let feedSystem = require("../feed-system/feed-system.js");
-let parser = require("../parser/parser.js");
+const config = require("../config.json");
+const parser = require("../parser/parser.js");
+const extractor = require("../feature-extractor/feature-extractor.js");
+const combiner = require("../parser/combiner.js");
+const preparer = require("../parser/preparer.js");
 
+const task = process.env.npm_config_task;
+const mode = process.env.npm_config_mode;
 
-parser.init();
+(function controller() {
+    if (task == "parse") {
+        if (mode == "mbox") parser.mbox();
+        if (mode == "file") parser.file();
+    }
+    if (task == "combine") {
+        combiner.init();
+    }
+    if (task == "prepare") {
+        preparer.init();
+    }
+    if (task == "extract") extractor.init();
+})();

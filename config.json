@@ -1,28 +1,39 @@
 {
-    "dataSet": "inbox1.mbox",
+    "debug": false,
+    "save": true,
+    "tldsTable": "table/tlds.json",
 
-    "emailObject": {
-        "returnPath": true,
-        "xOriginalTo": true,
-        "deliveredTo": true,
-        "received": false,
-        "from": true,
-        "subject": true,
-        "to": true,
-        "contentType": false,
-        "mimeVersion": false,
-        "replyTo": false,
-        "date": false,
-        "messageId": false,
-        "status": false,
-        "xStatus": false,
-        "xKeywords": false,
-        "xUid": false
-    },
+    "parserInputFile": "data-set/parser-input/ham1/",
+    "parserOutputFile": "data-set/parser-output/ham1.json",
 
+    "combinerInputFiles":  [
+        ["data-set/parser-output/inbox1.json", "PHISH"],
+        ["data-set/parser-output/ham1.json", "HAM"]],
+    "combinerOutputFile": "data-set/combiner-output/data-set.json",
 
-    "attributes": {
-        "test": true,
-        "blah": false
+    "extractorInputFile": "data-set/combiner-output/data-set.json",
+    "extractorOutputFileX": "client/js/x.js",
+    "extractorOutputFileY": "client/js/y.js",
+    
+
+    "features": {
+        "IRAQ01": false,
+        "IRAQ02": false,
+        "IRAQ03": false,
+        "IRAQ04": false,
+        "IRAQ05": false,
+        "IRAQ06": false,
+        "IRAQ07": false,
+        "IRAQ08": false,
+        "IRAQ09": false,
+        "IRAQ10": false,
+        "IRAQ11": false,
+        "IRAQ12": false,
+        "IRAQ13": false,
+        "IRAQ14": false,
+        "IRAQ15": false,
+        "IRAQ16": false,
+        "IRAQ17": false,
+        "IRAQ18": false
     }
 }
