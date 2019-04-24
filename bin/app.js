@@ -11,6 +11,7 @@ const mode = process.env.npm_config_mode;
     if (task == "parse") {
         if (mode == "mbox") parser.mbox();
         if (mode == "file") parser.file();
+        if (mode == "count") parser.count();
     }
     if (task == "combine") {
         combiner.init();

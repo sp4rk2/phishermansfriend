@@ -20,8 +20,15 @@ parser.file = () => {
     for (let i = 0; i < content.length; i++) {
         rawEmailArray.push(fs.readFileSync(parserInputFile + content[i], "utf-8"));
     }
+    console.log("Loaded " + rawEmailArray.length + " raw emails from " + parserInputFile + ".");
     parser.createObjects(rawEmailArray);
 };
+
+parser.count = () => {
+    let content = fs.readFileSync(parserInputFile, "utf8");
+    let rawEmailArray = parser.seperateEmails(content);
+    console.log("Loaded " + rawEmailArray.length + " raw emails from " + parserInputFile + ".");
+}
 
 parser.seperateEmails = str => {
     return str.match(/(From\s.*\s\d{4})(.|[\n\r])*?(?=(From\s.*\s\d{4}|$(?![\r\n])))/g);

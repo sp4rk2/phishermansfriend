@@ -3,18 +3,28 @@
     "save": true,
     "tldsTable": "table/tlds.json",
 
-    "parserInputFile": "data-set/parser-input/ham1/",
-    "parserOutputFile": "data-set/parser-output/ham1.json",
+    "parserInputFile": "data-set/parser-input/spam_assassin-mix/",
+    "parserOutputFile": "data-set/parser-output/spam_assassin-mix.json",
 
     "combinerInputFiles":  [
-        ["data-set/parser-output/inbox1.json", "PHISH"],
-        ["data-set/parser-output/ham1.json", "HAM"]],
+        ["data-set/parser-output/jose_inbox1.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox2.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox3.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox4.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox5.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox6.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox7.json", "PHISH"],
+        ["data-set/parser-output/jose_inbox8.json", "PHISH"],
+        ["data-set/parser-output/spam_assassin-mix.json", "HAM"]],
     "combinerOutputFile": "data-set/combiner-output/data-set.json",
 
     "extractorInputFile": "data-set/combiner-output/data-set.json",
     "extractorOutputFileX": "client/js/x.js",
     "extractorOutputFileY": "client/js/y.js",
-    
+    "extractorOutputFileXTest": "client/js/xTest.js",
+    "extractorOutputFileYTest": "client/js/yTest.js",
+
+    "extractorTestPercent": 20,
 
     "features": {
         "IRAQ01": false,
@@ -34,6 +44,16 @@
         "IRAQ15": false,
         "IRAQ16": false,
         "IRAQ17": false,
-        "IRAQ18": false
+        "IRAQ18": false,
+
+        "ZHANG01": true,
+        "ZHANG02": true,
+        "ZHANG03": true,
+        "ZHANG04": true,
+        "ZHANG05": true,
+        "ZHANG06": true,
+        "ZHANG07": true,
+        "ZHANG08": true,
+        "ZHANG09": true
     }
 }

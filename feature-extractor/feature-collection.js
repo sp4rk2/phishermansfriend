@@ -1,162 +1,236 @@
 const feature = {};
 const config = require("../config.json");
 const fs = require("fs");
-
+const cheerio = require("cheerio");
+const url = require("url");
+const getUrls = require("get-urls");
 const extension = config.tldsTable;
 
-/*
-    "This is a binary feature take a value 1 if there is HTML code  
-    embedded within the email and 0 otherwise."
-    If the email contains HTML content, then return 1.
-*/
-feature.IRAQ01 = email => email.content.html !== undefined ? 1 : 0;
-
-/*
-    "This feature takes a value 1 if the number of pictures used as  
-    link is more than 2 otherwise it takes 0 value [7]."
-    If the email contains HTML content, check for any <a><img/></a> links.
-    If there are more than 2, return 1.
-*/
-feature.IRAQ02 = email => {
+/*1. Total number of links 
+Phishing emails usually contain multiple links to fake websites for readers to sign in.*/
+feature.ZHANG01 = email => {
+    let count = 0;
     if (email.content.html !== undefined) {
-        let result = email.content.html.match(/\<a(\s|\\n)[^\<]*\>(?!.*\<a(\s|\\n)[^\<]*\>)[(*\s\S]?\<img[^\<]*(\>|\/\>)(?!.*\<a(\s|\\n)[^\<]*\>)[.*\s\S]*?\<\/a\>/igm) || [];
-        // console.log(result);
-        return result.length > 2 ? 1 : 0;
-    } else return 0;
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                if (url.parse(htmlLinks[i].attribs.href).host !== null) count += 1;
+            } 
+            catch (err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    } else if (email.content.text !== undefined) {
+        count += getUrls(email.content.text).size;
+    }
+    return count;
 }
 
-/*
-    "This feature takesa value of 1 if the number of different domains
-
-    in the email is more than 3 and 0 otherwise [7]."
-    This checks both the text content and the html content. It retrives all domain-
-    like strings, removes any 'www.' prefixes, and compares the domain extension with
-    a valid list. If its not a valid domain, its removed. Duplicates are removed.
-    If there are more than 2 unique domains, return 1.
-*/
-feature.IRAQ03 = email => {
-    let domainTable = [];
-    let result = [];
-
-    if (email.content.text !== undefined) {
-
-        result = result.concat(email.content.text.match(/([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}/igm) || []);
- 
-    } else if (email.content.html !== undefined) {
-
-        result = result.concat(email.content.html.match(/([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}/igm) || []);
-
-    } else return 0;
-
-    //Remove www domains.
-    for (let i = 0; i < result.length; i++) {
-        if (result[i].split(".")[0] === "www") {
-            result[i] = result[i].replace("www.", "");
+/*2. Number of IP-based links
+A legitimate website usually has a domain name for identiﬁcation
+while phishers typically use multiple zombie systems to host phishing
+sites. Besides, the use of IP address makes it difﬁcult for readers to
+know exactly which site they are being directed to when they click
+on the link. Therefore, the presence of IP-based links can be a good
+indicator of phishing emails.*/
+feature.ZHANG02 = email => {
+    let count = 0;
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname || "";
+                if (hostname.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g) !== null) count += 1;
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    } else if (email.content.text !== undefined) {
+        const textLinks = getUrls(email.content.text);
+        for (let link of textLinks) {
+            let hostname = url.parse(link).hostname;
+            if (hostname.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/g) !== null) count += 1;
         }
     }
+    return count;
+}
 
-    //Remove any domains without correct extension.
-    extensions = JSON.parse(fs.readFileSync(extension, "utf8"));
-    for (let i = result.length - 1; i >= 0; i--) {
-        let domainArray = result[i].split(".");
-        if (!(extensions.includes(domainArray[domainArray.length - 1]))) {
-            result.splice(result.indexOf(result[i]), 1);
+/*3. Number of deceptive links
+Deceptive links are the ones with visible URLs different
+from the URLs to which they are pointing. Some phishers use
+this technique to fool email readers into clicking on the links.*/
+feature.ZHANG03 = email => {
+    let count = 0;
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                    let textHostname = url.parse(htmlLinks[i].children[j].data).hostname;
+                    if (hostname !== null && textHostname !== null) {
+                        if (textHostname !== "") {
+                            if (hostname !== textHostname) count += 1;
+                        }
+                    }
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
         }
     }
-
-    //Remove duplicates.
-    result = result.filter((v, i, a) => a.indexOf(v) === i);
-
-    return result.length > 2 ? 1 : 0;
+    return count;
 }
 
-/*
-    "This feature takes a value 1 if the number of embedded links in the email
-    is more than 3 otherwise, its value set 0 [7]."
-    If the email contains HTML, it checks for any links (including protocol, directory,
-    file, and queries). Duplicates are removed (Should they be?). If there are more than 3
-    links, it returns a 1. As alot of the emails are based of shopping websites, 
-    the likely hood of there being more than 3 links is almost guarenteed. Some have 75
-    unique links.
-*/
-// feature.IRAQ04 = email => {
-//     if (email.content.html !== undefined) {
-//         let result = email.content.html.match(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/igm) || [];
-//         result = result.filter((v, i, a) => a.indexOf(v) === i);
-//         return result.length > 3 ? 1 : 0;
-//     } else return 0;
-// }
-
-/*Looks for forms in the html*/
-feature.IRAQ05 = email => {
-    if(email.content.html !== undefined) {
-        let result = email.content.html.match(/\<form(\s|\\n)[^\<]*\>(?!.*\<form(\s|\\n)[^\<]*\>)[.*\s\S]*?\<\/form\>/igm) || [];
-        return result.length > 0 ? 1 : 0;
-    } else return 0;
-}
-
-/*FROM does not equal REPLYTO*/
-feature.IRAQ06 = email => {
-    // console.log(email.)
-}
-
-feature.IRAQ07 = email => {
-    
-}
-
-feature.IRAQ08 = email => {
-    
-}
-
-feature.IRAQ09 = email => {
-    
-}
-
-/*IP address links*/
-feature.IRAQ10 = email => {
-    let result = [];
-    if (email.content.text !== undefined) {
-        result = result.concat(email.content.text.match(/(http|https):\/\/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/igm) || []);
-    } else if (email.content.html !== undefined) {
-        result = result.concat(email.content.html.match(/(http|https):\/\/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/igm) || [])
-    } else {
-        return 0;
+/*4. Number of links behind an image
+In order to make the emails look authentic, phishers often
+place in the emails images or banners linking to a legitimate website.
+Thus, if URL-based images appear in an email, it is likely to be an phishing email.*/
+feature.ZHANG04 = email => {
+    let count = 0;
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                if (url.parse(htmlLinks[i].attribs.href).hostname !== null) {
+                    for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                        if (htmlLinks[i].children[j].type === "tag") {
+                            if (htmlLinks[i].children[j].name == "img") {
+                                count += 1;
+                            }
+                        }
+                    }
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
     }
-
-    return result.length > 0 ? 1 : 0;
-    
+    return count;
 }
 
-feature.IRAQ11 = email => {
-    
+feature.ZHANG05 = email => {
+    let count = 0;
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                if (url.parse(htmlLinks[i].attribs.href).hostname !== null) {
+                   let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                   if (hostname.split(".").length - 1 > count) {
+                       count = hostname.split(".").length - 1;
+                   }
+                }
+            } 
+            catch (err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    } else if (email.content.text !== undefined) {
+        let urls = getUrls(email.content.text);
+        for (let i of urls) {
+            let hostname = url.parse(i).hostname;
+            if (hostname.split(".").length - 1 > count) {
+                count = hostname.split(".").length - 1;
+            }
+        }
+    }
+    return count;
 }
 
-feature.IRAQ12 = email => {
-    
+feature.ZHANG06 = email => {
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                    let text = htmlLinks[i].children[j].data;
+                    if (text !== undefined) {
+                        let textArray = text.split(" ");
+                        for (let k = 0; k < textArray.length; k++) {
+                            if (textArray[k] == "click") {
+                                return 1;
+                            }
+                        }
+                    }
+                    
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    }
+    return 0;
 }
 
-feature.IRAQ13 = email => {
-    
+feature.ZHANG07 = email => {
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                    let text = htmlLinks[i].children[j].data;
+                    if (text !== undefined) {
+                        let textArray = text.split(" ");
+                        for (let k = 0; k < textArray.length; k++) {
+                            if (textArray[k] == "here") {
+                                return 1;
+                            }
+                        }
+                    }
+                    
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    }
+    return 0;
 }
 
-feature.IRAQ14 = email => {
-    
+feature.ZHANG08 = email => {
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                    let text = htmlLinks[i].children[j].data;
+                    if (text !== undefined) {
+                        let textArray = text.split(" ");
+                        for (let k = 0; k < textArray.length; k++) {
+                            if (textArray[k] == "login") {
+                                return 1;
+                            }
+                        }
+                    }
+                    
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    }
+    return 0;
 }
 
-feature.IRAQ15 = email => {
-    
-}
-
-feature.IRAQ16 = email => {
-    
-}
-
-feature.IRAQ17 = email => {
-    
-}
-
-feature.IRAQ18 = email => {
-    
+feature.ZHANG09 = email => {
+    if (email.content.html !== undefined) {
+        const $ = cheerio.load(email.content.html);
+        const htmlLinks = $("a");
+        for (let i = 0; i < htmlLinks.length; i++) {
+            try {
+                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
+                for (let j = 0; j < htmlLinks[i].children.length; j++) {
+                    let text = htmlLinks[i].children[j].data;
+                    if (text !== undefined) {
+                        let textArray = text.split(" ");
+                        for (let k = 0; k < textArray.length; k++) {
+                            if (textArray[k] == "update") {
+                                return 1;
+                            }
+                        }
+                    }
+                    
+                }
+            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
+        }
+    }
+    return 0;
 }
 
 module.exports = feature;

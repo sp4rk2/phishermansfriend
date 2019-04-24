@@ -7,7 +7,7 @@ const learningRate = 0.1;
 const x = tf.tensor2d(xData);
 const y = tf.tensor2d(yData);
 
-function createModel() {
+(() => {
     console.log("CREATING MODEL");
     const hidden = model.add(tf.layers.dense({
         units: hiddenUnits,
@@ -30,12 +30,56 @@ function createModel() {
         optimizer: optimizer
     });
     console.log("MODEL COMPILED");
-}
+})();
 
 async function train() {
     for (let i = 0; i < 1000; i++) {
         const response = await model.fit(x, y);
         console.log("ITTERATION " + Number(i + 1) + ": " + response.history.loss[0]);
+    }
+    const saveResults = await model.save('localstorage://my-model-2');
+}
+
+async function test() {
+    const loadedModel = await tf.loadLayersModel('localstorage://my-model-2');
+    let correct = 0;
+    let unknown = 0;
+    let wrong = 0;
+
+    let TP = 0;
+    let TN = 0;
+    let FP = 0;
+    let FN = 0;
+    let threshold = 0.5;
+
+    for (let i = 0; i < xTestData.length; i++) {
+        let email = tf.tensor2d([xTestData[i]]);
+        let output = loadedModel.predict(email).dataSync();
+        if (output[0] > threshold) {
+            if (yTestData[i][0] === 1) TP += 1;
+            else FN += 1;
+        } else {
+            if (yTestData[i][0] === 0) TN += 1;
+            else FP += 1;
+        }
+        // console.log("PHISHING LIKELIHOOD:\t\t" + output[0] + " (" + yTestData[i][0] + ")");
+    }
+    let accuracy = (TN + TP) / TN + FP + TP + FN;
+    console.log("TP: " + TP);
+    console.log("TN: " + TN);
+    console.log("FN: " + FN);
+    console.log("FP: " + FP);
+    console.log("AC: " + accuracy);
+}
+
+function predictModel(featureArray) {
+    let email = tf.tensor2d([featureArray]);
+    let output = model.predict(email).dataSync();
+    console.log("PHISH LIKELIHOOD:\t\t" + output[0]);
+    if (output[0] >= 0.5) {
+        console.log("DETECTED AS PHISHING");
+    } else {
+        console.log("DETECTED AS HAM");
     }
 }
 
@@ -44,9 +88,7 @@ function trainModel() {
     train().then(() => console.log("TRAINING COMPLETE"));
 }
 
-function predictModel(featureArray) {
-    let email = tf.tensor2d([featureArray]);
-    let output = model.predict(email).dataSync();
-    console.log("HAM LIKELIHOOD:\t\t" + output[0]);
-    console.log("PHISH LIKELIHOOD:\t" + output[1]);
+function testModel() {
+    console.log("TESTING STARTED");
+    test().then(() => console.log("TESTING COMPLETE"));
 }
