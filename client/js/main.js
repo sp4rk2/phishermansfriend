@@ -37,33 +37,41 @@ async function train() {
         const response = await model.fit(x, y);
         console.log("ITTERATION " + Number(i + 1) + ": " + response.history.loss[0]);
     }
-    const saveResults = await model.save('localstorage://my-model-2');
+    const saveResults = await model.save('localstorage://my-model-1');
 }
 
 async function test() {
-    const loadedModel = await tf.loadLayersModel('localstorage://my-model-2');
-    let correct = 0;
-    let unknown = 0;
-    let wrong = 0;
-
+    const loadedModel = await tf.loadLayersModel('localstorage://my-model-1');
     let TP = 0;
     let TN = 0;
     let FP = 0;
     let FN = 0;
     let threshold = 0.5;
-
+    let outputText = "";
     for (let i = 0; i < xTestData.length; i++) {
+        let truth;
         let email = tf.tensor2d([xTestData[i]]);
         let output = loadedModel.predict(email).dataSync();
         if (output[0] > threshold) {
-            if (yTestData[i][0] === 1) TP += 1;
-            else FN += 1;
+            if (yTestData[i][0] === 1) {
+                TP += 1;
+                truth = true;
+            } else {
+                FP += 1;
+                truth = false;
+            }
         } else {
-            if (yTestData[i][0] === 0) TN += 1;
-            else FP += 1;
+            if (yTestData[i][0] === 0) {
+                TN += 1;
+                truth = true;
+            } else {
+                FN += 1;
+                truth = false;
+            }
         }
-        // console.log("PHISHING LIKELIHOOD:\t\t" + output[0] + " (" + yTestData[i][0] + ")");
+        outputText += String(String(Math.round(output * 100) / 100) + " " + truth + "\n");
     }
+    document.getElementById("output").innerText = outputText;
     let accuracy = (TN + TP) / TN + FP + TP + FN;
     console.log("TP: " + TP);
     console.log("TN: " + TN);
