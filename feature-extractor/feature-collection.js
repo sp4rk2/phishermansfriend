@@ -134,6 +134,7 @@ feature.ZHANG05 = email => {
 }
 
 feature.ZHANG06 = email => {
+    let words = ["click", "here", "login", "update"]
     if (email.content.html !== undefined) {
         const $ = cheerio.load(email.content.html);
         const htmlLinks = $("a");
@@ -145,7 +146,7 @@ feature.ZHANG06 = email => {
                     if (text !== undefined) {
                         let textArray = text.split(" ");
                         for (let k = 0; k < textArray.length; k++) {
-                            if (textArray[k] == "click") {
+                            if (words.includes(textArray[k])) {
                                 return 1;
                             }
                         }
@@ -160,75 +161,7 @@ feature.ZHANG06 = email => {
 
 feature.ZHANG07 = email => {
     if (email.content.html !== undefined) {
-        const $ = cheerio.load(email.content.html);
-        const htmlLinks = $("a");
-        for (let i = 0; i < htmlLinks.length; i++) {
-            try {
-                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
-                for (let j = 0; j < htmlLinks[i].children.length; j++) {
-                    let text = htmlLinks[i].children[j].data;
-                    if (text !== undefined) {
-                        let textArray = text.split(" ");
-                        for (let k = 0; k < textArray.length; k++) {
-                            if (textArray[k] == "here") {
-                                return 1;
-                            }
-                        }
-                    }
-                    
-                }
-            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
-        }
-    }
-    return 0;
-}
-
-feature.ZHANG08 = email => {
-    if (email.content.html !== undefined) {
-        const $ = cheerio.load(email.content.html);
-        const htmlLinks = $("a");
-        for (let i = 0; i < htmlLinks.length; i++) {
-            try {
-                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
-                for (let j = 0; j < htmlLinks[i].children.length; j++) {
-                    let text = htmlLinks[i].children[j].data;
-                    if (text !== undefined) {
-                        let textArray = text.split(" ");
-                        for (let k = 0; k < textArray.length; k++) {
-                            if (textArray[k] == "login") {
-                                return 1;
-                            }
-                        }
-                    }
-                    
-                }
-            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
-        }
-    }
-    return 0;
-}
-
-feature.ZHANG09 = email => {
-    if (email.content.html !== undefined) {
-        const $ = cheerio.load(email.content.html);
-        const htmlLinks = $("a");
-        for (let i = 0; i < htmlLinks.length; i++) {
-            try {
-                let hostname = url.parse(htmlLinks[i].attribs.href).hostname;
-                for (let j = 0; j < htmlLinks[i].children.length; j++) {
-                    let text = htmlLinks[i].children[j].data;
-                    if (text !== undefined) {
-                        let textArray = text.split(" ");
-                        for (let k = 0; k < textArray.length; k++) {
-                            if (textArray[k] == "update") {
-                                return 1;
-                            }
-                        }
-                    }
-                    
-                }
-            } catch(err) { if (err.name !== "TypeError [ERR_INVALID_ARG_TYPE]") console.error(err);}
-        }
+        return 1;
     }
     return 0;
 }

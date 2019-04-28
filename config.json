@@ -51,9 +51,7 @@
         "ZHANG03": true,
         "ZHANG04": true,
         "ZHANG05": true,
-        "ZHANG06": true,
-        "ZHANG07": true,
-        "ZHANG08": true,
-        "ZHANG09": true
+        "ZHANG06": false,
+        "ZHANG07": false
     }
 }

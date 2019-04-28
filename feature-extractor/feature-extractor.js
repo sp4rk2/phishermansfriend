@@ -29,7 +29,79 @@ extractor.init = () => {
         extractor.y.push(expectedArray);
     }
     extractor.save();
+    extractor.split();
 };
+
+extractor.split = () => {
+    extractor.xPhish = [];
+    extractor.yPhish = [];
+    extractor.xHam = [];
+    extractor.yHam = [];
+    for (let i = 0; i < extractor.y.length; i++) {
+        if (extractor.y[i][0] === 1) {
+            extractor.xPhish.push(extractor.x[i]);
+            extractor.yPhish.push(extractor.y[i]);
+        } else {
+            extractor.xHam.push(extractor.x[i]);
+            extractor.yHam.push(extractor.y[i]);
+        }
+    }
+
+    extractor.featurePhish = [];
+    extractor.featureHam = [];
+    for (let i = 0; i < extractor.xPhish[0].length; i++) {
+        extractor.featurePhish[i] = [];
+        extractor.featureHam[i] = [];
+        for (let j = 0; j < extractor.xPhish.length; j++) {
+            extractor.featurePhish[i].push(extractor.xPhish[j][i]);
+            extractor.featureHam[i].push(extractor.xHam[j][i]);
+        }
+    }
+
+    extractor.featurePhishMean = [];
+    extractor.featureHamMean = [];
+    for (let i = 0; i < extractor.featurePhish.length; i++) {
+        extractor.featurePhishMean.push(extractor.mean95(extractor.featurePhish[i]));
+        extractor.featureHamMean.push(extractor.mean95(extractor.featureHam[i]));
+    }
+
+    console.log(extractor.featurePhishMean);
+    console.log(extractor.featureHamMean);
+}
+
+extractor.mean95 = values => {
+	let sum = 0;
+	for (let i = 0; i < values.length; i++) {
+		sum += values[i];
+	}
+	let average = sum / values.length;
+	console.log("Initial average = " + average);
+	console.log("Total number of points = " + values.length);
+	let difsum = 0
+	for (let i = 0; i < values.length; i++) {
+		difsum += Math.pow((values[i] - average), 2);
+	}
+	let std = Math.sqrt(difsum / values.length);
+	let upper_limit = average + (2 * std);
+	let lower_limit = average - (2 * std);
+
+	let values_within = [];
+	for (let i = 0; i < values.length; i++) {
+		if (values[i] >= lower_limit && values[i] <= upper_limit) {
+			values_within.push(values[i]);
+		}
+	}
+	console.log("Standard deviation = " + std)
+	let final_sum = 0;
+	for (let i = 0; i < values_within.length; i++) {
+		final_sum += values_within[i];
+	}
+	let final_average = final_sum / values_within.length;
+	console.log("Final average = " + final_average);
+	console.log("Amount of data points included = " + values_within.length);
+	return final_average
+
+}
 
 extractor.normalize = () => {
     let ranges = [];
