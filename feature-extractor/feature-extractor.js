@@ -138,7 +138,7 @@ extractor.save = () => {
     extractor.yTest = extractor.y.slice(0, Number(extractor.y.length * config.extractorTestPercent) / 100);
     extractor.y = extractor.y.slice(Number(extractor.y.length * config.extractorTestPercent) / 100);
 
-    console.log(extractor.x.length);
+    console.log(extractor.x.length + extractor.xTest.length);
     console.log(extractor.y.length);
     console.log("Saving extracted training data to " + extractorOutputFileX + ".");
     fs.writeFileSync(extractorOutputFileX, "const xData = " + JSON.stringify(extractor.x, null, 4));

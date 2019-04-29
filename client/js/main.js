@@ -37,11 +37,11 @@ async function train() {
         const response = await model.fit(x, y);
         console.log("ITTERATION " + Number(i + 1) + ": " + response.history.loss[0]);
     }
-    const saveResults = await model.save('localstorage://my-model-4');
+    const saveResults = await model.save('localstorage://my-model-5-F');
 }
 
 async function test() {
-    const loadedModel = await tf.loadLayersModel('localstorage://my-model-4');
+    const loadedModel = await tf.loadLayersModel('localstorage://my-model-5-F');
     let TP = 0;
     let TN = 0;
     let FP = 0;

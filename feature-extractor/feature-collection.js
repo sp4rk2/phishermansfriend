@@ -105,6 +105,7 @@ feature.ZHANG04 = email => {
     return count;
 }
 
+/*Amount of subdomains?*/
 feature.ZHANG05 = email => {
     let count = 0;
     if (email.content.html !== undefined) {
